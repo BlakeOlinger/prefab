@@ -9,7 +9,7 @@ import java.util.Map;
 public class Main {
     private static final String base = "C:\\Users\\bolinger\\Documents\\SW Projects\\322326 - Prefab Blob\\";
     private static final String skeleton = "base blob - L1\\blob.basin.skeleton.txt";
-    private static final String coverBasinMate = "blob - L2\\blob.cover_mates.txt";
+    private static final String basinCoverMatePath = "blob - L2\\blob.cover_mates.txt";
     private static final String basinConfigPath = "base blob - L1\\blob.basinConfig.txt";
     private static final HashMap<String, String> basinConfigTable = new HashMap<>(
             Map.of(
@@ -28,7 +28,7 @@ public class Main {
         var requestedBasin = skeletonTextLines[0].split(" ")[1].trim();
 
         // read content from blob.basinConfig.txt
-        var basinConfigText = FilesUtil.read(Paths.get(base + basinConfigPath));
+        var basinConfigText = readContent(basinConfigPath);
 
         // get current basin config value written to blob.basinConfig.txt
         var currentBasinConfig = basinConfigText.split("\\n")[0].split(" ")[1].trim();
@@ -37,8 +37,32 @@ public class Main {
         basinConfigText = basinConfigText.replaceFirst(currentBasinConfig, basinConfigTable.get(requestedBasin));
 
         // write new basin config to blob.basin.SLDASM
-        FilesUtil.write(basinConfigText, Paths.get(base + basinConfigPath));
+        writeContent(basinConfigText, basinConfigPath);
 
+        /*
+        sets basin-cover mate height
+         */
 
+        // get basin depth - ASSUMES: basin request in all caps
+        var basinDepth = requestedBasin.split("X")[1].split("[A-Z]")[0];
+
+        // read content from blob.cover_mates.txt
+        var basinCoverMateText = readContent(basinCoverMatePath);
+
+        var currentCoverMate = basinCoverMateText.split("\\n")[0].split(" ")[1].split("in")[0];
+
+        currentCoverMate = String.valueOf((int) Double.parseDouble(currentCoverMate));
+
+        basinCoverMateText = basinCoverMateText.replaceFirst(currentCoverMate, basinDepth);
+
+        writeContent(basinCoverMateText, basinCoverMatePath);
+    }
+
+    private static String readContent(String file) {
+        return FilesUtil.read(Paths.get(base + file));
+    }
+
+    private static void writeContent(String content, String file) {
+        FilesUtil.write(content, Paths.get(base + file));
     }
 }
