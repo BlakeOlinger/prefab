@@ -1,6 +1,7 @@
 package sym.com;
 
 import bo.core.system.FilesUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ public class Main {
     private static final String skeleton = "base blob - L1\\blob.basin.skeleton.txt";
     private static final String basinCoverMatePath = "blob - L2\\blob.cover_mates.txt";
     private static final String basinConfigPath = "base blob - L1\\blob.basinConfig.txt";
+    private static final String upperGuideRailMatesPath = "blob - L3\\blob.L3_basinCoverL2_upperGuidRailL2_upperGuideRailMates.txt";
     private static final HashMap<String, String> basinConfigTable = new HashMap<>(
             Map.of(
                     "FB48X66S", "1",
@@ -49,13 +51,29 @@ public class Main {
         // read content from blob.cover_mates.txt
         var basinCoverMateText = readContent(basinCoverMatePath);
 
-        var currentCoverMate = basinCoverMateText.split("\\n")[0].split(" ")[1].split("in")[0];
+        var currentCoverMate = getDimensionFromLine(basinCoverMateText, 0);
 
         currentCoverMate = String.valueOf((int) Double.parseDouble(currentCoverMate));
 
         basinCoverMateText = basinCoverMateText.replaceFirst(currentCoverMate, basinDepth);
 
         writeContent(basinCoverMateText, basinCoverMatePath);
+        // END set basin-cover mate height
+
+        // START - upper guide rail mates
+        // guidRailHeight from blob.L3_basinCoverL2_upperGuidRailL2_upperGuideRailMates.txt is equal to basin height
+        // without adding 1/4"
+        var upperGuideRailMatesContent = readContent(upperGuideRailMatesPath);
+
+        var currentUpperGuideRailMateHeight = getDimensionFromLine(upperGuideRailMatesContent, 0);
+
+        upperGuideRailMatesContent = upperGuideRailMatesContent.replaceFirst(currentUpperGuideRailMateHeight, basinDepth);
+
+        writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
+    }
+
+    private static String getDimensionFromLine(@NotNull String content, int lineIndex) {
+        return content.split("\\n")[lineIndex].split(" ")[1].split("in")[0];
     }
 
     private static String readContent(String file) {
