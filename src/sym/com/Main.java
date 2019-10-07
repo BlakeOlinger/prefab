@@ -19,6 +19,11 @@ public class Main {
                     "FB48X84F", "2"
             )
     );
+    private static final HashMap<String, String[]> coverHatchClearAccessTable = new HashMap<>(
+            Map.of(
+                    "C48HSA-ONNNN", new String[]{"36", "24"}
+            )
+    );
 
     public static void main(String[] args) {
         // read blob.basin.skeleton - user input file
@@ -39,7 +44,7 @@ public class Main {
         basinConfigText = basinConfigText.replaceFirst(currentBasinConfig, basinConfigTable.get(requestedBasin));
 
         // write new basin config to blob.basin.SLDASM
-        writeContent(basinConfigText, basinConfigPath);
+//        writeContent(basinConfigText, basinConfigPath);
 
         /*
         sets basin-cover mate height
@@ -57,7 +62,7 @@ public class Main {
 
         basinCoverMateText = basinCoverMateText.replaceFirst(currentCoverMate, basinDepth);
 
-        writeContent(basinCoverMateText, basinCoverMatePath);
+//        writeContent(basinCoverMateText, basinCoverMatePath);
         // END set basin-cover mate height
 
         // START - upper guide rail mates
@@ -67,9 +72,24 @@ public class Main {
 
         var currentUpperGuideRailMateHeight = getDimensionFromLine(upperGuideRailMatesContent, 0);
 
+        // sets guideRailHeight = basin depth
         upperGuideRailMatesContent = upperGuideRailMatesContent.replaceFirst(currentUpperGuideRailMateHeight, basinDepth);
 
-        writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
+        var requestedCover = skeletonTextLines[1];
+
+        var clearAccessY = coverHatchClearAccessTable.get(requestedCover)[1];
+
+        var guideRailZOffset = Double.parseDouble(clearAccessY) / 2;
+
+        var currentGuideRailZOffset = getDimensionFromLine(upperGuideRailMatesContent, 6);
+
+        var guideRailZOffsetLine = upperGuideRailMatesContent.split("\\n")[6];
+
+        var newGuideRailZOffsetLine = guideRailZOffsetLine.replace(currentGuideRailZOffset, String.valueOf(guideRailZOffset));
+
+        upperGuideRailMatesContent = upperGuideRailMatesContent.replace(guideRailZOffsetLine, newGuideRailZOffsetLine);
+
+//        writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
     }
 
     private static String getDimensionFromLine(@NotNull String content, int lineIndex) {
