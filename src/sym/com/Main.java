@@ -13,6 +13,8 @@ public class Main {
     private static final String basinCoverMatePath = "blob - L2\\blob.cover_mates.txt";
     private static final String basinConfigPath = "base blob - L1\\blob.basinConfig.txt";
     private static final String upperGuideRailMatesPath = "blob - L3\\blob.L3_basinCoverL2_upperGuidRailL2_upperGuideRailMates.txt";
+    private static final String baseElbowPath = "base blob - L1\\blob.baseElbow.txt";
+    private static final String upperGuideRailPath = "base blob - L1\\blob.upperGuideRail.txt";
     private static final HashMap<String, String> basinConfigTable = new HashMap<>(
             Map.of(
                     "FB48X66S", "1",
@@ -27,6 +29,16 @@ public class Main {
     private static final HashMap<String, String> baseElbowUpperGuideRailXOffsetTable = new HashMap<>(
             Map.of(
                     "BERS-0320V", "11.88"
+            )
+    );
+    private static final HashMap<String, String> baseElbowFrontPlaneOffsetTable = new HashMap<>(
+            Map.of(
+                    "BERS-0320V", "3.75"
+            )
+    );
+    private static final HashMap<String, String> upperGuideRailFrontPlaneOffsetTable = new HashMap<>(
+            Map.of(
+                    "UGB-STNLS", "091"
             )
     );
 
