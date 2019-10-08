@@ -15,6 +15,8 @@ public class Main {
     private static final String upperGuideRailMatesPath = "blob - L3\\blob.L3_basinCoverL2_upperGuidRailL2_upperGuideRailMates.txt";
     private static final String baseElbowPath = "base blob - L1\\blob.baseElbow.txt";
     private static final String upperGuideRailPath = "base blob - L1\\blob.upperGuideRail.txt";
+    private static final String dischargeCouplingPath = "base blob - L1\\blob.dischargeCoupling.txt";
+    private static final String dischargeCouplingPipePath = "base blob - L1\\blob.dischargePipe_dischargeCoupling.txt";
     private static final HashMap<String, String> basinConfigTable = new HashMap<>(
             Map.of(
                     "FB48X66S", "1",
@@ -38,7 +40,12 @@ public class Main {
     );
     private static final HashMap<String, String> upperGuideRailFrontPlaneOffsetTable = new HashMap<>(
             Map.of(
-                    "UGB-STNLS", "091"
+                    "UGB-STNLS", "0.91"
+            )
+    );
+    private static final HashMap<String, String> dischargeCouplingFrontPlaneOffsetTable = new HashMap<>(
+            Map.of(
+                    "C300S", "1.63"
             )
     );
 
@@ -61,11 +68,13 @@ public class Main {
         basinConfigText = basinConfigText.replaceFirst(currentBasinConfig, basinConfigTable.get(requestedBasin));
 
         // write new basin config to blob.basin.SLDASM
-        writeContent(basinConfigText, basinConfigPath);
+//        writeContent(basinConfigText, basinConfigPath);
+        //
+        // END SET BASIN CONFIG
 
-        /*
-        sets basin-cover mate height
-         */
+
+        // set basin-cover mate height
+        //
 
         // get basin depth - ASSUMES: basin request in all caps
         var basinDepth = requestedBasin.split("X")[1].split("[A-Z]")[0];
@@ -79,8 +88,10 @@ public class Main {
 
         basinCoverMateText = basinCoverMateText.replaceFirst(currentCoverMate, basinDepth);
 
-        writeContent(basinCoverMateText, basinCoverMatePath);
+//        writeContent(basinCoverMateText, basinCoverMatePath);
+        //
         // END set basin-cover mate height
+
 
         // START - upper guide rail mates
         // guidRailHeight from blob.L3_basinCoverL2_upperGuidRailL2_upperGuideRailMates.txt is equal to basin height
@@ -118,7 +129,8 @@ public class Main {
 
         upperGuideRailMatesContent = upperGuideRailMatesContent.replace(currentGuideRailXOffsetLine, newGuideRailXOffsetLine);
 
-        writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
+//        writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
+        //
         // END WRITE UPPER GUIDE RAIL XYZ MATES
 
 
