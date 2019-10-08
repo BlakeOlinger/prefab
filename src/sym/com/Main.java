@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Main {
-    private static final String base = "C:\\Users\\bolinger\\Documents\\SW Projects\\322326 - Prefab Blob\\";
+    private static final String base = "C:\\Users\\bolinger\\Desktop\\Prefab Blob - Cover Blob\\";
     private static final String skeleton = "base blob - L1\\blob.basin.skeleton.txt";
     private static final String basinCoverMatePath = "blob - L2\\blob.cover_mates.txt";
     private static final String basinConfigPath = "base blob - L1\\blob.basinConfig.txt";
@@ -22,6 +22,11 @@ public class Main {
     private static final HashMap<String, String[]> coverHatchClearAccessTable = new HashMap<>(
             Map.of(
                     "C48HSA-ONNNN", new String[]{"36", "24"}
+            )
+    );
+    private static final HashMap<String, String> baseElbowUpperGuideRailXOffsetTable = new HashMap<>(
+            Map.of(
+                    "BERS-0320V", "11.88"
             )
     );
 
@@ -44,7 +49,7 @@ public class Main {
         basinConfigText = basinConfigText.replaceFirst(currentBasinConfig, basinConfigTable.get(requestedBasin));
 
         // write new basin config to blob.basin.SLDASM
-//        writeContent(basinConfigText, basinConfigPath);
+        writeContent(basinConfigText, basinConfigPath);
 
         /*
         sets basin-cover mate height
@@ -62,7 +67,7 @@ public class Main {
 
         basinCoverMateText = basinCoverMateText.replaceFirst(currentCoverMate, basinDepth);
 
-//        writeContent(basinCoverMateText, basinCoverMatePath);
+        writeContent(basinCoverMateText, basinCoverMatePath);
         // END set basin-cover mate height
 
         // START - upper guide rail mates
@@ -75,21 +80,36 @@ public class Main {
         // sets guideRailHeight = basin depth
         upperGuideRailMatesContent = upperGuideRailMatesContent.replaceFirst(currentUpperGuideRailMateHeight, basinDepth);
 
-        var requestedCover = skeletonTextLines[1];
+        var requestedCover = skeletonTextLines[1].trim();
 
         var clearAccessY = coverHatchClearAccessTable.get(requestedCover)[1];
 
         var guideRailZOffset = Double.parseDouble(clearAccessY) / 2;
 
-        var currentGuideRailZOffset = getDimensionFromLine(upperGuideRailMatesContent, 6);
+        var currentGuideRailZOffset = getDimensionFromLine(upperGuideRailMatesContent, 5);
 
-        var guideRailZOffsetLine = upperGuideRailMatesContent.split("\\n")[6];
+        var guideRailZOffsetLine = upperGuideRailMatesContent.split("\\n")[5];
 
         var newGuideRailZOffsetLine = guideRailZOffsetLine.replace(currentGuideRailZOffset, String.valueOf(guideRailZOffset));
 
+        // sets guideRailZOffset - placement against the inner clear access L bracket
         upperGuideRailMatesContent = upperGuideRailMatesContent.replace(guideRailZOffsetLine, newGuideRailZOffsetLine);
 
-//        writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
+        // get on line 3 of blob.basin.skeleton the base elbow requested and compare to the lookup table for the upper guide rail X offset
+        var currentGuideRailXOffset = upperGuideRailMatesContent.split("\\n")[3].split("=")[1];
+
+        var requestedBaseElbow = skeletonTextLines[2];
+
+        var currentGuideRailXOffsetLine = upperGuideRailMatesContent.split("\\n")[3];
+
+        var newGuideRailXOffsetLine = currentGuideRailXOffsetLine.replace(currentGuideRailXOffset, "") + " " + baseElbowUpperGuideRailXOffsetTable.get(requestedBaseElbow) + "in";
+
+        upperGuideRailMatesContent = upperGuideRailMatesContent.replace(currentGuideRailXOffsetLine, newGuideRailXOffsetLine);
+
+        writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
+        // END WRITE UPPER GUIDE RAIL XYZ MATES
+
+
     }
 
     private static String getDimensionFromLine(@NotNull String content, int lineIndex) {
