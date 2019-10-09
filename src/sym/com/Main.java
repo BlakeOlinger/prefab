@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Main {
-    private static final String base = "C:\\Users\\bolinger\\Desktop\\Prefab Blob - Cover Blob\\";
+    private static final String base = "C:\\Users\\bolinger\\Documents\\SolidWorks Projects\\Prefab Blob - Cover Blob\\";
     private static final String skeleton = "base blob - L1\\blob.basin.skeleton.txt";
     private static final String basinCoverMatePath = "blob - L2\\blob.cover_mates.txt";
     private static final String basinConfigPath = "base blob - L1\\blob.basinConfig.txt";
@@ -48,52 +48,35 @@ public class Main {
                     "C300S", "1.63"
             )
     );
+    private static String requestedBasin = "";
+    private static String[] skeletonTextLines = new String[]{};
+    private static String basinDepth = "";
+    private static boolean hasBasin = false;
 
     public static void main(String[] args) {
-        // read blob.basin.skeleton - user input file
-        var skeletonTxt = FilesUtil.read(Paths.get(base + skeleton));
+        var write = false;
 
-        var skeletonTextLines = skeletonTxt.split("\\n");
-
-        // get requested basin from first line, eg; FB48X84F
-        var requestedBasin = skeletonTextLines[0].split(" ")[1].trim();
-
-        // read content from blob.basinConfig.txt
-        var basinConfigText = readContent(basinConfigPath);
-
-        // get current basin config value written to blob.basinConfig.txt
-        var currentBasinConfig = basinConfigText.split("\\n")[0].split(" ")[1].trim();
-
-        // replace with requested via look-up table
-        basinConfigText = basinConfigText.replaceFirst(currentBasinConfig, basinConfigTable.get(requestedBasin));
-
-        // write new basin config to blob.basin.SLDASM
-//        writeContent(basinConfigText, basinConfigPath);
+        setBasinConfig(write);
         //
         // END SET BASIN CONFIG
 
 
         // set basin-cover mate height
         //
-
-        // get basin depth - ASSUMES: basin request in all caps
-        var basinDepth = requestedBasin.split("X")[1].split("[A-Z]")[0];
-
-        // read content from blob.cover_mates.txt
-        var basinCoverMateText = readContent(basinCoverMatePath);
-
-        var currentCoverMate = getDimensionFromLine(basinCoverMateText, 0);
-
-        currentCoverMate = String.valueOf((int) Double.parseDouble(currentCoverMate));
-
-        basinCoverMateText = basinCoverMateText.replaceFirst(currentCoverMate, basinDepth);
-
-//        writeContent(basinCoverMateText, basinCoverMatePath);
+        setBasinCoverMateHeight(write);
         //
         // END set basin-cover mate height
 
 
         // START - upper guide rail mates
+        setUpperGuideRailMates(write);
+        //
+        // END WRITE UPPER GUIDE RAIL XYZ MATES
+
+        System.out.println(hasBasin);
+    }
+
+    private static void setUpperGuideRailMates(boolean write) {
         // guidRailHeight from blob.L3_basinCoverL2_upperGuidRailL2_upperGuideRailMates.txt is equal to basin height
         // without adding 1/4"
         var upperGuideRailMatesContent = readContent(upperGuideRailMatesPath);
@@ -129,11 +112,61 @@ public class Main {
 
         upperGuideRailMatesContent = upperGuideRailMatesContent.replace(currentGuideRailXOffsetLine, newGuideRailXOffsetLine);
 
-//        writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
-        //
-        // END WRITE UPPER GUIDE RAIL XYZ MATES
+        if (write)
+            writeContent(upperGuideRailMatesContent, upperGuideRailMatesPath);
+    }
 
+    private static void setBasinCoverMateHeight(boolean write) {
+        if (hasBasin) {
+            try {
+                // get basin depth - ASSUMES: basin request in all caps
+                basinDepth = requestedBasin.split("X")[1].split("[A-Z]")[0];
 
+                // read content from blob.cover_mates.txt
+                var basinCoverMateText = readContent(basinCoverMatePath);
+
+                var currentCoverMate = getDimensionFromLine(basinCoverMateText, 0);
+
+                currentCoverMate = String.valueOf((int) Double.parseDouble(currentCoverMate));
+
+                basinCoverMateText = basinCoverMateText.replaceFirst(currentCoverMate, basinDepth);
+
+                if (write)
+                    writeContent(basinCoverMateText, basinCoverMatePath);
+            } catch (ArrayIndexOutOfBoundsException e) {
+
+            }
+        }
+    }
+
+    private static void setBasinConfig(boolean write) {
+        // read blob.basin.skeleton - user input file
+        var skeletonTxt = readContent(skeleton);
+
+        skeletonTextLines = skeletonTxt.split("\\n");
+
+        // get requested basin from first line, eg; FB48X84F
+        if (!skeletonTextLines[0].contains("0")) {
+            hasBasin = true;
+
+            try {
+                requestedBasin = skeletonTextLines[0].split(" ")[1].trim();
+
+                // read content from blob.basinConfig.txt
+                var basinConfigText = readContent(basinConfigPath);
+
+                // get current basin config value written to blob.basinConfig.txt
+                var currentBasinConfig = basinConfigText.split("\\n")[0].split(" ")[1].trim();
+
+                // replace with requested via look-up table
+                basinConfigText = basinConfigText.replaceFirst(currentBasinConfig, basinConfigTable.get(requestedBasin));
+
+                // write new basin config to blob.basin.SLDASM
+                if (write)
+                    writeContent(basinConfigText, basinConfigPath);
+            } catch (ArrayIndexOutOfBoundsException e) {
+            }
+        }
     }
 
     private static String getDimensionFromLine(@NotNull String content, int lineIndex) {
